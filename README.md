@@ -224,7 +224,7 @@
 
 #### <a name="chapter1part3.5"></a>Chapter 1 - Part 3.5: Starting the Virtual Machine
 
-#### <a name="chapter1part4"></a>Chapter 1 - Part 4: Installing a Linux Distribution (e.g., Ubuntu) in a VM
+#### <a name="chapter1part4"></a>Chapter 1 - Part 4: Installing a Linux Distribution in a VM
 
 #### <a name="chapter1part4.1"></a>Chapter 1 - Part 4.1: Preparing for Installation
 
