@@ -1860,13 +1860,510 @@ rm -v file1.txt file2.txt file3.txt
 
 #### <a name="chapter2part4"></a>Chapter 2 - Part 4: Understanding File Permissions: `chmod`, `chown`
 
+File permissions are a cornerstone of Linux security, controlling who can access and modify files and directories. Understanding and manipulating these permissions is crucial for maintaining a secure and stable system. The ```chmod``` and ```chown``` commands are the primary tools for managing file permissions and ownership, respectively. This lesson will provide a comprehensive guide to using these commands effectively.
+
 #### <a name="chapter2part4.1"></a>Chapter 2 - Part 4.1: Understanding File Permissions
+
+In Linux, every file and directory has associated permissions that determine who can read, write, and execute it. These permissions are categorized into three classes:
+
+- **User (Owner)**: The user who owns the file.
+- **Group**: The group that owns the file.
+- **Others**: All other users on the system.
+
+Each class has three types of permissions:
+
+- **Read (r)**: Allows the file to be read or the directory to be listed.
+- **Write (w)**: Allows the file to be modified or the directory to have files added or removed.
+- **Execute (x)**: Allows the file to be executed as a program or the directory to be entered (traversed).
+
+**Representing Permissions**
+
+File permissions are typically represented in two ways: symbolic and numeric (octal).
+
+**Symbolic Representation**
+
+The symbolic representation uses letters to indicate the permissions for each class. For example:
+
+- ```rwx```: Read, write, and execute permissions.
+- ```r-x```: Read and execute permissions, but no write permission.
+- ```r--```: Read permission only.
+- ```--x```: Execute permission only.
+- ```---```: No permissions.
+
+A full permission string looks like this: ```drwxr-xr--```. Let's break it down:
+
+- The first character indicates the file type:
+  - ```d```: Directory
+  - ```-```: Regular file
+  - ```l```: Symbolic link
+  - ```c```: Character device
+  - ```b```: Block device
+  - ```s```: Socket
+  - ```p```: Named pipe
+- The next three characters (```rwx```) represent the owner's permissions.
+- The following three characters (```r-x```) represent the group's permissions.
+- The last three characters (```r--```) represent the permissions for others.
+
+**Example:**
+
+A file with permissions ```drwxr-xr--``` indicates:
+
+It's a directory (```d```).
+The owner has read, write, and execute permissions (```rwx```).
+The group has read and execute permissions (```r-x```).
+Others have only read permission (```r--```).
+
+**Numeric (Octal) Representation**
+
+The numeric representation uses octal numbers (base 8) to represent the permissions. Each permission type is assigned a numeric value:
+
+- Read (r): 4
+- Write (w): 2
+- Execute (x): 1
+- No permission (-): 0
+
+To determine the octal representation for a class, you add the values of the permissions.
+
+**Examples:**
+
+- ```rwx```: 4 + 2 + 1 = 7
+- ```r-x```: 4 + 0 + 1 = 5
+- ```r--```: 4 + 0 + 0 = 4
+- ```--x```: 0 + 0 + 1 = 1
+- ```---```: 0 + 0 + 0 = 0
+
+A full permission set is represented by three octal digits, one for each class (owner, group, others).
+
+**Example:**
+
+The symbolic permission ```rwxr-xr--``` is represented as ```754``` in octal:
+
+- Owner (```rwx```): 4 + 2 + 1 = 7
+- Group (```r-x```): 4 + 0 + 1 = 5
+- Others (```r--```): 4 + 0 + 0 = 4
+
+**Viewing File Permissions**
+
+You can view file permissions using the ```ls -l``` command. This command displays detailed information about files and directories, including their permissions, owner, group, size, and modification date.
+
+**Example:**
+
+```bash
+ls -l myfile.txt
+```
+
+Output:
+
+```
+-rw-r--r-- 1 user group 1024 Jan 01 10:00 myfile.txt
+```
+
+In this example:
+
+- ```-``` indicates it's a regular file.
+- ```rw-r--r--``` represents the permissions:
+  - Owner: read and write
+  - Group: read
+  - Others: read
+- ```1``` is the number of hard links to the file.
+- ```user``` is the owner of the file.
+- ```group``` is the group owner of the file.
+- ```1024``` is the file size in bytes.
+- ```Jan 01 10:00``` is the last modification date and time.
+- ```myfile.txt``` is the file name.
 
 #### <a name="chapter2part4.2"></a>Chapter 2 - Part 4.2: The chmod Command
 
+The ```chmod``` command is used to change file permissions. It can be used with both symbolic and numeric representations.
+
+Using Symbolic Mode
+In symbolic mode, you specify the class of users, an operator, and the permissions to add or remove.
+
+Syntax:
+
+```bash
+chmod [who][operator][permission] filename
+```
+
+- ```who```: Specifies the class of users:
+  - ```u```: User (owner)
+  - ```g```: Group
+  - ```o```: Others
+  - ```a```: All (user, group, and others)
+- ```operator```: Specifies the action to perform:
+  - ```+```: Add the permission
+  - ```-```: Remove the permission
+  - ```=```: Set the permission (removes all existing permissions of that type)
+- ```permission```: Specifies the permission to add, remove, or set:
+  - ```r```: Read
+  - ```w```: Write
+  - ```x```: Execute
+
+**Examples:**
+
+- **Add execute permission for the owner:**
+
+```bash
+chmod u+x myfile.txt
+```
+
+This command adds execute permission to the owner of ```myfile.txt```.
+
+- **Remove write permission for the group:**
+
+```bash
+chmod g-w myfile.txt
+```
+
+This command removes write permission from the group of ```myfile.txt```.
+
+- **Set read and write permissions for the owner, and read-only for group and others:**
+
+```bash
+chmod u=rw,g=r,o=r myfile.txt
+```
+
+This command sets the owner's permissions to read and write, and the group and others' permissions to read-only.
+
+- **Add read permission for everyone:**
+
+```bash
+chmod a+r myfile.txt
+```
+
+This command adds read permission for the owner, group, and others.
+
+- **Remove all permissions for others:**
+
+```bash
+chmod o-rwx myfile.txt
+```
+
+This command removes read, write, and execute permissions for others.
+
+**Using Numeric (Octal) Mode**
+
+In numeric mode, you specify the permissions using the octal representation.
+
+**Syntax:**
+
+```bash
+chmod [mode] filename
+```
+
+- ```mode```: The octal representation of the permissions (e.g., 755, 644, 777).
+
+**Examples:**
+
+- **Set permissions to ```rwxr-xr--``` (754):**
+
+```bash
+chmod 754 myfile.txt
+```
+
+This command sets the owner's permissions to read, write, and execute, the group's permissions to read and execute, and others' permissions to read-only.
+
+- **Set permissions to rw-rw-r-- (664):**
+
+```bash
+chmod 664 myfile.txt
+```
+
+This command sets the owner's and group's permissions to read and write, and others' permissions to read-only.
+
+- **Set permissions to ```rwxrwxrwx``` (777):**
+
+```bash
+chmod 777 myfile.txt
+```
+
+This command sets read, write, and execute permissions for everyone (owner, group, and others). Use this with caution as it can create security vulnerabilities.
+
+- **Set permissions to ```rw-------``` (600):**
+
+```bash
+chmod 600 myfile.txt
+```
+
+This command sets read and write permissions for the owner only, and no permissions for group and others. This is a secure setting for sensitive files.
+
+**Recursive chmod**
+
+The ```-R``` option allows you to apply ```chmod``` recursively to a directory and all its contents (subdirectories and files).
+
+**Syntax:**
+
+```bash
+chmod -R [mode] directory
+```
+
+or
+
+```bash
+chmod -R [who][operator][permission] directory
+```
+
+**Examples:**
+
+- **Set permissions to ```755``` recursively for a directory**:
+
+```bash
+chmod -R 755 mydirectory
+```
+
+This command sets the permissions of ```mydirectory``` and all its contents to ```rwxr-xr-x```.
+
+- **Add execute permission for the owner recursively**:
+
+```bash
+chmod -R u+x mydirectory
+```
+
+This command adds execute permission to the owner of ```mydirectory``` and all its contents.
+
+**Special Permissions: SetUID, SetGID, and Sticky Bit**
+
+There are three special permissions that can be set on executable files and directories: SetUID (SUID), SetGID (SGID), and Sticky Bit.
+
+**SetUID (SUID)**
+
+When the SetUID bit is set on an executable file, it allows users to execute the file with the privileges of the file's owner, rather than their own. This is represented by an ```s``` in the owner's execute permission slot (instead of ```x```). If the owner does not have execute permissions, it is represented by a capital ```S```.
+
+**Example:**
+
+```bash
+chmod u+s myfile.sh
+```
+
+If the original permissions were ```-rwxr-xr--```, after applying ```u+s```, the permissions would become ```-rwsr-xr--```.
+
+If the original permissions were ```-rw-r-xr--```, after applying ```u+s```, the permissions would become ```-rwSr-xr--```.
+
+**Numeric Representation**: The SUID bit is represented by the number ```4000```. To set SUID using numeric mode, add ```4000``` to the existing permissions. For example, to set SUID on a file with permissions ```755```, you would use ```chmod 4755 myfile.sh```.
+
+**SetGID (SGID)**
+
+When the SetGID bit is set on an executable file, it allows users to execute the file with the privileges of the file's group, rather than their own. For directories, it forces all new files and subdirectories created within the directory to inherit the group ownership of the directory. This is represented by an ```s``` in the group's execute permission slot (instead of ```x```). If the group does not have execute permissions, it is represented by a capital ```S```.
+
+**Example:**
+
+```bash
+chmod g+s mydirectory
+```
+
+If the original permissions were ```drwxr-xr--```, after applying ```g+s```, the permissions would become ```drwxr-sr--```.
+
+If the original permissions were ```drwxr--r--```, after applying ```g+s```, the permissions would become ```drwxr-Sr--```.
+
+**Numeric Representation**: The SGID bit is represented by the number ```2000```. To set SGID using numeric mode, add ```2000``` to the existing permissions. For example, to set SGID on a directory with permissions ```755```, you would use ```chmod 2755 mydirectory```.
+
+**Sticky Bit**
+
+When the Sticky Bit is set on a directory, it restricts file deletion within the directory to the file's owner, the directory's owner, and the root user. This is commonly used on shared directories like ```/tmp```. This is represented by a ```t``` in the others' execute permission slot (instead of ```x```). If others do not have execute permissions, it is represented by a capital ```T```.
+
+**Example:**
+
+```bash
+chmod o+t /tmp/shared_directory
+```
+
+If the original permissions were ```drwxrwxr-x```, after applying ```o+t```, the permissions would become ```drwxrwxr-t```.
+
+If the original permissions were ```drwxrwxr--```, after applying ```o+t```, the permissions would become ```drwxrwxr-T```.
+
+**Numeric Representation**: The Sticky Bit is represented by the number ```1000```. To set the Sticky Bit using numeric mode, add ```1000``` to the existing permissions. For example, to set the Sticky Bit on a directory with permissions ```777```, you would use ```chmod 1777 /tmp/shared_directory```.
+
+**Default Permissions (umask)**
+
+The ```umask``` command sets the default permissions for newly created files and directories. It essentially defines which permissions should not be granted by default. The ```umask``` value is subtracted from the default permissions (666 for files and 777 for directories) to determine the actual permissions.
+
+To view the current ```umask``` value, simply type ```umask``` in the terminal.
+
+**Example:**
+
+```bash
+umask
+```
+
+Output:
+
+```
+0022
+```
+
+This ```umask``` value means:
+
+- Owner: No permissions are masked (0).
+- Group: Write permission is masked (2).
+- Others: Write permission is masked (2).
+
+Therefore:
+
+- New files will have permissions ```666 - 022 = 644``` (```rw-r--r--```).
+- New directories will have permissions v777 - 022 = 755``` (```rwxr-xr-x```).
+
+You can change the ```umask``` value using the ```umask``` command followed by the new value.
+
+Example:
+
+umask 0027
+This sets the umask to 0027, which means:
+
+New files will have permissions 666 - 027 = 640 (rw-r-----).
+New directories will have permissions 777 - 027 = 750 (rwxr-x---).
+
 #### <a name="chapter2part4.3"></a>Chapter 2 - Part 4.3: The chown Command
 
+The ```chown``` command is used to change the owner and/or group ownership of a file or directory.
+
+**Changing Ownership**
+
+**Syntax:**
+
+```bash
+chown [user] filename
+```
+
+This command changes the owner of the file to the specified user.
+
+**Example:**
+
+```bash
+chown newuser myfile.txt
+```
+
+This command changes the owner of ```myfile.txt``` to ```newuser```.
+
+**Changing Group Ownership**
+
+**Syntax:**
+
+```bash
+chown :[group] filename
+```
+
+This command changes the group ownership of the file to the specified group.
+
+**Example:**
+
+```bash
+chown :newgroup myfile.txt
+```
+
+This command changes the group ownership of ```myfile.txt``` to ```newgroup```.
+
+**Changing Both Owner and Group**
+
+**Syntax:**
+
+```bash
+chown [user]:[group] filename
+```
+
+This command changes both the owner and group ownership of the file.
+
+**Example:**
+
+```bash
+chown newuser:newgroup myfile.txt
+```
+
+This command changes the owner of ```myfile.txt``` to ```newuser``` and the group ownership to ```newgroup```.
+
+**Using User ID and Group ID**
+
+You can also use the user ID (UID) and group ID (GID) instead of the user and group names.
+
+**Syntax:**
+
+```bash
+chown [UID]:[GID] filename
+```
+
+**Example:**
+
+```bash
+chown 1001:1001 myfile.txt
+```
+
+This command changes the owner to the user with UID 1001 and the group to the group with GID 1001.
+
+**Recursive ```chown```**
+
+The ```-R``` option allows you to apply ```chown``` recursively to a directory and all its contents.
+
+**Syntax:**
+
+```bash
+chown -R [user]:[group] directory
+```
+
+**Example:**
+
+```bash
+chown -R newuser:newgroup mydirectory
+```
+
+This command changes the owner to ```newuser``` and the group to ```newgroup``` for ```mydirectory``` and all its contents.
+
+**Changing Ownership of Symbolic Links**
+
+By default, ```chown``` changes the ownership of the file or directory pointed to by a symbolic link, not the link itself. To change the ownership of the symbolic link itself, use the ```-h``` option.
+
+**Syntax:**
+
+```bash
+chown -h [user]:[group] symlink
+```
+
+**Example:**
+
+```bash
+chown -h newuser:newgroup mylink
+```
+
+This command changes the owner and group of the symbolic link ```mylink``` itself, not the file it points to.
+
+**Restrictions on ```chown```**
+
+Only the root user (or a user with ```sudo``` privileges) can change the ownership of a file. A regular user can only change the group ownership of a file if they own the file and are a member of the target group.
+
 #### <a name="chapter2part4.4"></a>Chapter 2 - Part 4.4: Practical Examples and Demonstrations
+
+Let's consider a scenario where you are setting up a web server. You have a directory ```/var/www/html``` that contains the website files. You want to ensure that the web server user (```www-data```) has the necessary permissions to read and write the files, while other users should only have read access.
+
+- **Set the owner and group of the directory to ```www-data```:**
+
+```bash
+sudo chown -R www-data:www-data /var/www/html
+```
+
+This command changes the owner and group of the ```/var/www/html``` directory and all its contents to ```www-data```. The ```sudo``` command is necessary because you are changing ownership, which requires root privileges.
+
+- **Set the permissions to ```755``` for directories and ```644``` for files:**
+
+To do this, you can use the ```find``` command in conjunction with ```chmod```.
+
+```bash
+sudo find /var/www/html -type d -exec chmod 755 {} \;
+sudo find /var/www/html -type f -exec chmod 644 {} \;
+```
+
+The first command finds all directories (```-type d```) within ```/var/www/html``` and executes ```chmod 755``` on them. The second command finds all files (```-type f```) and executes ```chmod 644``` on them.
+
+- **Ensure that new files and directories created in ```/var/www/html``` inherit the correct ownership and permissions:**
+
+You can set the SetGID bit on the directory to ensure that new files and subdirectories inherit the group ownership of the directory.
+
+```bash
+sudo chmod g+s /var/www/html
+```
+
+You can also set an appropriate ```umask``` value to control the default permissions of new files and directories. For example, setting ```umask 002``` will ensure that new files have permissions ```664``` and new directories have permissions ```775```.
+
+```bash
+umask 002
+```
 
 #### <a name="chapter2part5"></a>Chapter 2 - Part 5: Viewing File Content: `cat`, `less`, `head`, `tail`
 
