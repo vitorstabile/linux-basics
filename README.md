@@ -2206,11 +2206,14 @@ You can change the ```umask``` value using the ```umask``` command followed by t
 
 Example:
 
+```bash
 umask 0027
-This sets the umask to 0027, which means:
+```
 
-New files will have permissions 666 - 027 = 640 (rw-r-----).
-New directories will have permissions 777 - 027 = 750 (rwxr-x---).
+This sets the ```umask``` to ```0027```, which means:
+
+- New files will have permissions ```666 - 027 = 640``` (```rw-r-----```).
+- New directories will have permissions ```777 - 027 = 750``` (```rwxr-x---```).
 
 #### <a name="chapter2part4.3"></a>Chapter 2 - Part 4.3: The chown Command
 
