@@ -2616,11 +2616,283 @@ This will display all lines from line 20 to the end of the file and continue to 
 
 #### <a name="chapter2part6"></a>Chapter 2 - Part 6: Using Wildcards and Regular Expressions for File Management
 
+Wildcards and regular expressions are powerful tools for file management in Linux. They allow you to select files based on patterns, making it easier to perform operations on multiple files at once. This lesson will cover the basics of wildcards and regular expressions, and how to use them with common Linux commands. Understanding these concepts will significantly improve your efficiency when working with the command line.
+
 #### <a name="chapter2part6.1"></a>Chapter 2 - Part 6.1: Understanding Wildcards
+
+Wildcards, also known as globbing patterns, are special characters that represent other characters. They are interpreted by the shell to match filenames. Here are the most common wildcards:
+
+- ```*```: Matches zero or more characters.
+- ```?```: Matches any single character.
+- ```[]```: Matches any single character within the specified range or set.
+- ```[!...] or [^...]```: Matches any single character not within the specified range or set.
+
+**Examples of Wildcards**
+
+Let's illustrate how these wildcards work with some examples. Suppose you have the following files in your current directory:
+
+- ```file1.txt```
+- ```file2.txt```
+- ```file10.txt```
+- ```data.csv```
+- ```report.pdf```
+- ```image.png```
+
+- **Using * (Matches zero or more characters)**:
+
+  - ```ls *.txt```: This command will list all files ending with ```.txt```. The output will be:
+ 
+```
+file1.txt  file2.txt  file10.txt
+```
+ 
+  - ```ls file*```: This command will list all files starting with ```file```. The output will be:
+
+```
+file1.txt  file10.txt  file2.txt
+```
+ 
+  - ```ls *```: This command will list all files in the current directory.
+
+- **Using ? (Matches any single character):**
+
+  - ```ls file?.txt```: This command will list files that start with ```file```, followed by any single character, and ending with ```.txt```. The output will be:
+ 
+```
+file1.txt  file2.txt
+```
+ 
+  - ```ls data.cs?```: This command will list files that start with ```data.cs``` followed by any single character. If you had a file named ```data.csv```, it would be listed.
+
+- **Using [] (Matches any single character within the specified range or set)**:
+
+  - ```ls file[12].txt```: This command will list files that start with ```file```, followed by either ```1``` or ```2```, and ending with ```.txt```. The output will be:
+ 
+```
+file1.txt  file2.txt
+```
+
+  - ```ls file[1-9].txt```: This command will list files that start with ```file```, followed by any digit from 1 to 9, and ending with ```.txt```. The output will be:
+
+```
+file1.txt  file2.txt
+```
+
+  - ```ls file[0-9]*.txt```: This command will list files that start with ```file```, followed by any digit from 0 to 9, and then any characters until ```.txt```. The output will be:
+
+```
+file1.txt  file10.txt  file2.txt
+```
+
+- **Using [!...] or [^...] (Matches any single character not within the specified range or set)**:
+
+  - ```ls file[!1].txt```: This command will list files that start with ```file```, followed by any character that is not 1, and ending with ```.txt```. The output will be:
+ 
+```
+file2.txt
+```
+ 
+  - ```ls file[^1].txt```: This command is equivalent to the previous one and will produce the same output.
+
+**Practical Examples with Other Commands**
+
+Wildcards are not limited to the ```ls``` command. You can use them with other commands like ```cp```, ```mv```, and ```rm```.
+
+- **Copying files**:
+
+  - ```cp file*.txt backup_dir/```: This command will copy all ```.txt``` files starting with ```file``` to the ```backup_dir``` directory. Make sure ```backup_dir``` exists before running this command using ```mkdir backup_dir```.
+
+- **Moving files**:
+
+  - ```mv *.txt documents/```: This command will move all ```.txt``` files to the ```documents``` directory. Make sure ```documents``` exists before running this command using ```mkdir documents```.
+
+- **Removing files**:
+
+  - ```rm file?.txt```: This command will remove all files that start with ```file```, followed by any single character, and ending with ```.txt```. **Use with caution!**
 
 #### <a name="chapter2part6.2"></a>Chapter 2 - Part 6.2: Introduction to Regular Expressions
 
+Regular expressions (regex or regexp) are more powerful than wildcards. They are patterns that describe a set of strings. Regular expressions are used in many programming languages and text processing tools, including Linux commands like ```grep```, ```sed```, and ```awk```.
+
+**Basic Regular Expression Syntax**
+
+Here are some basic regular expression metacharacters and their meanings:
+
+- ```.```: Matches any single character (except newline).
+- ```*```: Matches the preceding character zero or more times.
+- ```+```: Matches the preceding character one or more times.
+- ```?```: Matches the preceding character zero or one time.
+- ```^```: Matches the beginning of a line.
+- ```$```: Matches the end of a line.
+- ```[]```: Matches any single character within the specified range or set.
+- ```[^...]```: Matches any single character not within the specified range or set.
+- ```()```: Groups characters together.
+- ```|```: Specifies alternatives (OR).
+- ```\```: Escapes a special character (e.g., ```\.``` matches a literal dot).
+
+**Using grep with Regular Expressions**
+
+The grep command is used to search for lines in a file that match a given pattern. By default, grep uses basic regular expressions (BRE). To use extended regular expressions (ERE), which include features like +, ?, |, and (), you can use the -E option.
+
+**Examples of grep with Regular Expressions**
+
+Let's create a file named ```sample.txt``` with the following content:
+
+```
+This is line 1.
+This is line 22.
+This is line 333.
+This is another line.
+Line with number 4444.
+A line at the beginning.
+End of the file.
+```
+
+- **Matching lines starting with "This"**:
+
+```bash
+grep "^This" sample.txt
+```
+
+Output:
+
+```
+This is line 1.
+This is line 22.
+This is line 333.
+```
+
+- **Matching lines ending with "line."**:
+
+```bash
+grep "line.$" sample.txt
+```
+
+Output:
+
+```
+This is another line.
+```
+
+- **Matching lines containing one or more digits**:
+
+```bash
+grep -E "[0-9]+" sample.txt
+```
+
+Output:
+
+```
+This is line 1.
+This is line 22.
+This is line 333.
+Line with number 4444.
+```
+
+- **Matching lines containing "line" followed by a space and then one or more digits**:
+
+```bash
+grep -E "line [0-9]+" sample.txt
+```
+
+Output:
+
+```
+This is line 1.
+This is line 22.
+This is line 333.
+```
+
+- **Matching lines containing "line" followed by any character and then a digit**:
+
+```bash
+grep "line.1" sample.txt
+```
+
+Output:
+
+```
+This is line 1.
+```
+
+- **Matching lines containing "beginning" or "End"**:
+
+```bash
+grep -E "beginning|End" sample.txt
+```
+
+Output:
+
+```
+A line at the beginning.
+End of the file.
+```
+
+**Advanced Regular Expression Examples**
+
+- **Matching email addresses**:
+
+While a truly robust email regex is complex, a simple one can be:
+
+```bash
+grep -E "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" emails.txt
+```
+
+This regex looks for a sequence of alphanumeric characters, dots, underscores, percent signs, plus or minus signs, followed by an ```@``` symbol, then another sequence of alphanumeric characters, dots, and hyphens, followed by a dot and a top-level domain of at least two letters.
+
+- **Matching IP addresses**:
+
+```bash
+grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" ip_addresses.txt
+```
+
+This regex looks for four groups of one to three digits, separated by dots. Note that this regex doesn't validate the range of each number (0-255), but it's a good starting point.
+
 #### <a name="chapter2part6.3"></a>Chapter 2 - Part 6.3: Real-World Application
+
+Consider a scenario where you are a system administrator managing a web server. You need to analyze the server's access logs to identify potential security threats or performance issues. Access logs typically contain information about each request made to the server, including the IP address of the client, the requested resource, the timestamp, and the HTTP status code.
+
+- **Identifying Failed Login Attempts**:
+
+You can use ```grep``` with regular expressions to search for failed login attempts in the access logs. For example, if failed login attempts are logged with a specific message like "Invalid username or password", you can use the following command:
+
+```bash
+grep "Invalid username or password" /var/log/apache2/access.log
+```
+
+This command will display all lines in the access log that contain the specified error message, allowing you to identify potential brute-force attacks.
+
+- **Analyzing Website Traffic**:
+
+You can use ```grep``` and other command-line tools to analyze website traffic patterns. For example, you can use the following command to count the number of requests from a specific IP address:
+
+```bash
+grep "192.168.1.100" /var/log/apache2/access.log | wc -l
+```
+
+This command will count the number of lines in the access log that contain the IP address "192.168.1.100", giving you an idea of the traffic originating from that IP address.
+
+- **Finding Specific File Types Requested**:
+
+If you want to find all requests for image files (e.g., ```.jpg```, ```.png```, ```.gif```), you can use a regular expression like this:
+
+```bash
+grep -E "\.(jpg|png|gif)$" /var/log/apache2/access.log
+```
+
+This will show all lines in the log where the request ends with one of the specified image file extensions.
+
+- **Monitoring for 404 Errors**:
+
+To find all "Not Found" errors (HTTP status code 404), you can use:
+
+```bash
+grep " 404 " /var/log/apache2/access.log
+```
+
+The spaces around "404" help to avoid matching other status codes like 2404 or 4044.
+
+These examples demonstrate how wildcards and regular expressions can be used in real-world scenarios to manage and analyze files, making them invaluable tools for system administrators and developers.
 
 ## <a name="chapter3"></a>Chapter 3: Working with Users and Groups
 
