@@ -76,8 +76,7 @@
       - [Chapter 3 - Part 3.1: Understanding deluser and userdel](#chapter3part3.1)
       - [Chapter 3 - Part 3.2: Using userdel](#chapter3part3.2)
       - [Chapter 3 - Part 3.3: Using deluser](#chapter3part3.3)
-      - [Chapter 3 - Part 3.4: Comparing deluser and userdel](#chapter3part3.4)
-      - [Chapter 3 - Part 3.5: Practical Examples and Demonstrations](#chapter3part3.5)
+      - [Chapter 3 - Part 3.4: Practical Examples and Demonstrations](#chapter3part3.4)
     - [Chapter 3 - Part 4: Modifying User Accounts: `usermod`](#chapter3part4)
       - [Chapter 3 - Part 4.1: Understanding the usermod Command](#chapter3part4.1)
       - [Chapter 3 - Part 4.2: Practical Examples of Using usermod](#chapter3part4.2)
@@ -3266,21 +3265,383 @@ The ```/etc/default/useradd``` file contains default settings for the ```useradd
 
 #### <a name="chapter3part3"></a>Chapter 3 - Part 3: Deleting User Accounts: `deluser`, `userdel`
 
+Deleting user accounts is a crucial aspect of system administration. When users leave an organization or no longer require access to a system, their accounts should be properly removed to maintain security and resource management. This lesson will cover the ```deluser``` and ```userdel``` commands, which are used to delete user accounts on Linux systems. We'll explore the differences between these commands, their options, and best practices for ensuring a clean and secure user removal process.
+
 #### <a name="chapter3part3.1"></a>Chapter 3 - Part 3.1: Understanding deluser and userdel
+
+Both ```deluser``` and ```userdel``` are used to remove user accounts, but they differ in their functionality and how they handle user-related files and data.
+
+- ```userdel```: This is a low-level utility that primarily removes the user account from the system's user database (usually ```/etc/passwd``` and ```/etc/shadow```). It doesn't, by default, remove the user's home directory or mail spool.
+
+- ```deluser```: This is a higher-level utility, often a Perl script, that provides a more user-friendly and comprehensive way to delete user accounts. It can remove the user's home directory and mail spool, and it also handles group memberships more gracefully. ```deluser``` is often preferred because it offers more options and performs a cleaner removal.
+
+On some systems, ```deluser``` might not be installed by default. If it's not available, you can typically install it using your distribution's package manager (e.g., ```apt install deluser``` on Debian/Ubuntu).
 
 #### <a name="chapter3part3.2"></a>Chapter 3 - Part 3.2: Using userdel
 
+The basic syntax for ```userdel``` is:
+
+```bash
+sudo userdel [options] username
+```
+
+Here's a breakdown of the options:
+
+- ```-f```: Force the removal of the user account, even if the user is still logged in. This is generally not recommended as it can lead to data corruption.
+- ```-r```: Remove the user's home directory and mail spool. This is the most important option for a clean removal.
+
+**Example:**
+
+To delete the user "testuser" and their home directory, you would use the following command:
+
+```bash
+sudo userdel -r testuser
+```
+
+**Important Considerations:**
+
+- Before deleting a user with ```userdel```, ensure the user is not logged in. You can check logged-in users using the ```who``` or ```w``` command.
+- If the user owns files outside their home directory, ```userdel``` will not remove those files. You'll need to manually locate and remove them.
+- ```userdel``` only removes the user account and optionally the home directory. It does not automatically remove the user from any groups they belong to.
+
 #### <a name="chapter3part3.3"></a>Chapter 3 - Part 3.3: Using deluser
 
-#### <a name="chapter3part3.4"></a>Chapter 3 - Part 3.4: Comparing deluser and userdel
+The basic syntax for ```deluser``` is:
 
-#### <a name="chapter3part3.5"></a>Chapter 3 - Part 3.5: Practical Examples and Demonstrations
+```bash
+sudo deluser [options] username
+```
+
+Here's a breakdown of the options:
+
+- ```--remove-home```: Remove the user's home directory and mail spool. This is equivalent to the ```-r``` option in ```userdel```.
+- ```--remove-all-files```: Remove all files owned by the user, regardless of their location. This is a more aggressive option and should be used with caution.
+- ```--backup```: Before removing files, create a backup archive. This is a good practice to prevent accidental data loss.
+- ```--backup-to DIRECTORY```: Specify the directory where the backup archive should be stored.
+- ```--only-if-empty```: Remove the user only if they don't own any files on the system.
+- ```--quiet```: Suppress most output.
+- ```--force```: Force the removal, similar to ```userdel -f```.
+
+**Examples:**
+
+- To delete the user "testuser" and their home directory:
+
+```bash
+sudo deluser --remove-home testuser
+```
+
+- To delete the user "testuser", back up their files to ```/backup```, and then remove them:
+
+```bash
+sudo deluser --backup --backup-to /backup testuser
+```
+
+- To delete the user "testuser" and all files owned by them (use with extreme caution):
+
+```bash
+sudo deluser --remove-all-files testuser
+```
+
+**Important Considerations:**
+
+- ```deluser``` is generally safer than ```userdel``` because it provides more options for backing up and removing files.
+- The ```--remove-all-files``` option should be used with extreme caution, as it can potentially delete important system files if the user owns them. Always double-check the files owned by the user before using this option. You can use the ```find``` command to list files owned by a user (e.g., ```find / -user testuser```).
+- ```deluser``` also handles group memberships more gracefully than ```userdel```. When a user is deleted with ```deluser```, they are automatically removed from any groups where they are the only member.
+
+#### <a name="chapter3part3.4"></a>Chapter 3 - Part 3.4: Practical Examples and Demonstrations
+
+Let's walk through some practical examples to illustrate how to use ```deluser``` and ```userdel```.
+
+**Scenario**: You have a user account named "johndoe" that needs to be removed from the system.
+
+**Using ```userdel```**:
+
+- **Check if the user is logged in**:
+
+```bash
+who | grep johndoe
+```
+
+If the user is logged in, ask them to log out or terminate their session (using ```kill```, which will be covered in a later module).
+
+- **Delete the user and their home directory**:
+
+```bash
+sudo userdel -r johndoe
+```
+
+- **Verify the user is deleted**:
+
+```bash
+id johndoe
+```
+
+This command should return an error indicating that the user does not exist.
+
+**Using ```deluser```**:
+
+- **Check if the user is logged in**:
+
+```bash
+who | grep johndoe
+```
+
+If the user is logged in, ask them to log out or terminate their session.
+
+- **Delete the user and their home directory**:
+
+```bash
+sudo deluser --remove-home johndoe
+```
+
+- **Verify the user is deleted**:
+
+```bash
+id johndoe
+```
+
+This command should return an error indicating that the user does not exist.
+
+**Advanced Scenario: Backing up user files before deletion (using ```deluser```)**:
+
+- **Create a backup directory**:
+
+```bash
+sudo mkdir /backup
+sudo chown $USER:$USER /backup
+```
+
+- **Delete the user and back up their files**:
+
+```bash
+sudo deluser --backup --backup-to /backup johndoe
+```
+
+- **Verify the user is deleted**:
+
+```bash
+id johndoe
+```
+
+This command should return an error indicating that the user does not exist.
+
+- **Check the backup directory**:
+
+```bash
+ls /backup
+```
+
+You should see a backup archive (e.g., ```johndoe.tar.gz```) containing the user's files.
+
+**Best Practices for Deleting User Accounts**
+
+- **Always back up user data before deleting an account**. This is especially important if the user has important files or data that may be needed in the future.
+- **Ensure the user is not logged in before deleting their account**. Deleting an account while the user is logged in can lead to data corruption or other issues.
+- **Use deluser instead of userdel whenever possible**. ```deluser``` provides more options and is generally safer and more comprehensive.
+- **Be careful when using the ```--remove-all-files``` option**. This option can potentially delete important system files if the user owns them. Always double-check the files owned by the user before using this option.
+- **Document the user deletion process**. Keep a record of when and why a user account was deleted. This can be helpful for auditing and security purposes.
+- **Consider disabling the account instead of deleting it**. If there's a chance the account may be needed again in the future, disabling it (using ```usermod -L```, which will be covered in the next lesson) may be a better option than deleting it.
 
 #### <a name="chapter3part4"></a>Chapter 3 - Part 4: Modifying User Accounts: `usermod`
 
+The ```usermod``` command is a powerful tool in Linux for modifying existing user accounts. Unlike ```adduser``` or ```useradd```, which are used to create new users, ```usermod``` allows you to change various attributes of an already existing user, such as their username, home directory, shell, groups, and more. This is crucial for system administration as user requirements and roles evolve over time. Understanding ```usermod``` is essential for maintaining a secure and well-organized Linux system.
+
 #### <a name="chapter3part4.1"></a>Chapter 3 - Part 4.1: Understanding the usermod Command
 
+The ```usermod``` command is used to modify a user account. It takes various options to specify which attributes of the user account should be changed. The basic syntax is:
+
+```bash
+sudo usermod [options] username
+```
+
+Here, ```username``` is the name of the user account you want to modify, and ```[options]``` are the flags that specify the changes you want to make. Because you are modifying user accounts, you will typically need ```sudo``` privileges.
+
+**Key Options for usermod**
+
+Here's a breakdown of some of the most commonly used options with ```usermod```:
+
+- ```-l, --login NEW_LOGIN```: Changes the username.
+- ```-d, --home HOME_DIR```: Changes the user's home directory.
+- ```-m, --move-home```: Used in conjunction with ```-d``` to move the contents of the old home directory to the new one.
+- ```-g, --gid GROUP```: Changes the user's primary group.
+- ```-a, --append```: Used with ```-G``` to add the user to supplementary groups without removing them from the existing groups.
+- ```-G, --groups GROUP1[,GROUP2,...]```: Changes the list of supplementary groups a user is a member of.
+- ```-s, --shell SHELL```: Changes the user's login shell.
+- ```-c, --comment COMMENT```: Changes the user's comment field (GECOS field).
+- ```-L, --lock```: Locks a user's account, preventing login.
+- ```-U, --unlock```: Unlocks a user's account, allowing login.
+- ```-e, --expiredate EXPIRE_DATE```: Sets an expiration date for the user account. The date is specified in YYYY-MM-DD format.
+- ```-f, --inactive INACTIVE```: Sets the number of days after a password expires until the account is permanently disabled. A value of 0 disables the account immediately after the password expires; a value of -1 disables the feature.
+- ```-p, --password PASSWORD```: This option is deprecated. Use ```passwd``` command to change the password.
+
 #### <a name="chapter3part4.2"></a>Chapter 3 - Part 4.2: Practical Examples of Using usermod
+
+Let's explore some practical examples of how to use the ```usermod``` command. We'll assume you have a user named ```testuser``` already created on your system.
+
+```bash
+sudo usermod -l newuser testuser
+```
+
+**Important Considerations:**
+
+- After running this command, the user will be known as ```newuser```.
+- The home directory will still be ```/home/testuser```. You'll likely want to change that as well (see next example).
+- Make sure no processes are running under the user account you are modifying. It's best to have the user logged out.
+
+**Changing the Home Directory**
+
+To change the home directory of ```newuser``` to ```/home/newuser```, and move the contents of the old home directory, use the ```-d``` and ```-m``` options together:
+
+```bash
+sudo usermod -d /home/newuser -m newuser
+```
+
+**Explanation:**
+
+- ```-d /home/newuser``` specifies the new home directory.
+- ```-m``` ensures that the contents of the old home directory (```/home/testuser```) are moved to the new one (```/home/newuser```).
+
+**Important Considerations:**
+
+- Moving the home directory can take a while if the user has many files.
+- Ensure the target directory (```/home/newuser``` in this case) either doesn't exist or is empty before running the command to avoid conflicts.
+- After this command, the ownership of the files in the new home directory might be incorrect. You can fix this with ```chown -R newuser:newuser /home/newuser```. We covered ```chown``` in a previous lesson.
+
+**Changing the Primary Group**
+
+To change the primary group of ```newuser``` to ```developers```, use the ```-g``` option:
+
+```bash
+sudo usermod -g developers newuser
+```
+
+**Explanation:**
+
+- ```-g developers``` sets the primary group to ```developers```. The group ```developers``` must already exist. You can create it using ```addgroup developers``` if it doesn't. We will cover ```addgroup``` in the next lesson.
+
+**Important Considerations:**
+
+- A user's primary group is important for file creation. By default, files created by the user will have this group as their group owner.
+- The group must exist before you can assign it.
+
+**Adding a User to Supplementary Groups**
+
+To add ```newuser``` to the supplementary groups ```admins``` and ```testers``` without removing them from any existing groups, use the ```-a``` and ```-G``` options together:
+
+```bash
+sudo usermod -a -G admins,testers newuser
+```
+
+**Explanation:**
+
+- ```-a``` ensures that the user is appended to the list of supplementary groups.
+- ```-G admins,testers``` specifies the groups to add the user to.
+
+If you use ```-G``` without ```-a```, you will replace the user's existing supplementary groups with the ones specified. For example:
+
+```bash
+sudo usermod -G admins,testers newuser
+```
+
+This command would make ```newuser``` a member of only ```admins``` and ```testers```, removing them from any other supplementary groups they were previously a member of.
+
+**Important Considerations:**
+
+- Supplementary groups grant users additional permissions.
+- Be careful when using ```-G``` without ```-a``` to avoid unintentionally removing users from important groups.
+
+**Changing the Login Shell**
+
+To change the login shell of ```newuser``` to ```/bin/zsh```, use the ```-s``` option:
+
+```bash
+sudo usermod -s /bin/zsh newuser
+```
+
+**Explanation:**
+
+- ```-s /bin/zsh``` sets the login shell to ```/bin/zsh```.
+
+**Important Considerations:**
+
+- The shell must be a valid executable. You can find a list of valid shells in ```/etc/shells```.
+- Changing the shell affects the user's command-line environment.
+
+**Changing the Comment Field (GECOS)**
+
+To change the comment field (GECOS) of ```newuser``` to "John Doe, System Administrator", use the ```-c``` option:
+
+```bash
+sudo usermod -c "John Doe, System Administrator" newuser
+```
+
+**Explanation:**
+
+- ```-c "John Doe, System Administrator"``` sets the comment field.
+
+**Important Considerations:**
+
+- The comment field is often used to store information like the user's full name, office location, and phone number.
+- This information is often displayed by commands like ```finger```.
+
+**Locking and Unlocking User Accounts**
+
+To lock the ```newuser``` account, preventing them from logging in, use the ```-L``` option:
+
+```bash
+sudo usermod -L newuser
+```
+
+To unlock the account, use the ```-U``` option:
+
+```bash
+sudo usermod -U newuser
+```
+
+**Explanation:**
+
+- ```-L``` locks the account by adding an "!" before the encrypted password in ```/etc/shadow```.
+- ```-U``` unlocks the account by removing the "!" from ```/etc/shadow```.
+
+**Important Considerations:**
+
+- Locking an account is a good way to temporarily disable access without deleting the account.
+- This is useful when an employee is on leave or has been temporarily suspended.
+
+**Setting an Expiration Date**
+
+To set an expiration date for the ```newuser``` account to December 31, 2024, use the ```-e``` option:
+
+```bash
+sudo usermod -e 2024-12-31 newuser
+```
+
+**Explanation:**
+
+- ```-e 2024-12-31``` sets the expiration date to December 31, 2024.
+
+**Important Considerations:**
+
+- After the expiration date, the user will no longer be able to log in.
+- This is useful for temporary accounts or accounts that should only be active for a specific period.
+
+**Setting Inactive Days**
+
+To set the number of inactive days after a password expires to 30 for ```newuser```, use the ```-f``` option:
+
+```bash
+sudo usermod -f 30 newuser
+```
+
+**Explanation:**
+
+- ```-f 30``` sets the account to be disabled 30 days after the password expires.
+
+**Important Considerations:**
+
+- If the password expires and the user doesn't change it within 30 days, the account will be disabled.
+- A value of 0 disables the account immediately after the password expires.
+- A value of -1 disables the feature, meaning the account will never be disabled due to password expiration.
 
 #### <a name="chapter3part5"></a>Chapter 3 - Part 5: Creating and Managing Groups: `addgroup`, `delgroup`
 
