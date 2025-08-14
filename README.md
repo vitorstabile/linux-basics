@@ -7227,11 +7227,397 @@ This demonstrates that running the script with bash modifies the current shell's
 
 #### <a name="chapter6part6"></a>Chapter 6 - Part 6: Variables and Basic Control Structures in Shell Scripts (if/else)
 
+Shell scripting is a powerful way to automate tasks in Linux. This lesson introduces variables, which allow you to store and manipulate data within your scripts, and ```if/else``` control structures, which enable your scripts to make decisions based on conditions. Mastering these concepts is crucial for writing more complex and useful shell scripts.
+
 #### <a name="chapter6part6.1"></a>Chapter 6 - Part 6.1: Variables in Shell Scripts
+
+Variables are named storage locations that hold data. In shell scripting, variables are used to store strings, numbers, or the output of commands.
+
+**Declaring and Assigning Variables**
+
+Unlike some programming languages, you don't need to explicitly declare the type of a variable in shell scripting. You simply assign a value to a name.
+
+```bash
+#!/bin/bash
+
+# Assigning a string to a variable
+NAME="John Doe"
+
+# Assigning a number to a variable
+AGE=30
+
+# Assigning the output of a command to a variable
+CURRENT_DATE=$(date)
+
+echo "Name: $NAME"
+echo "Age: $AGE"
+echo "Current Date: $CURRENT_DATE"
+```
+
+Explanation:
+
+- ```NAME="John Doe"```: Assigns the string "John Doe" to the variable ```NAME```. Note that there should be no spaces around the ```=``` sign.
+- ```AGE=30```: Assigns the number 30 to the variable ```AGE```.
+- ```CURRENT_DATE=$(date)```: Assigns the output of the ```date``` command to the variable ```CURRENT_DATE```. The ```$()``` syntax is command substitution, which executes the command inside the parentheses and replaces it with its output.
+- ```echo "Name: $NAME"```: Prints the value of the ```NAME``` variable to the console. The ```$``` sign is used to access the value of a variable.
+
+**Accessing Variables**
+
+To access the value of a variable, you use the ```$``` sign followed by the variable name. You can also use curly braces {} to enclose the variable name, which is sometimes necessary to avoid ambiguity.
+
+```bash
+#!/bin/bash
+
+FILE_NAME="my_document.txt"
+
+# Accessing the variable
+echo "The file name is: $FILE_NAME"
+
+# Using curly braces to avoid ambiguity
+echo "The file name is: ${FILE_NAME}.bak" # Without curly braces, the shell might interpret this as a variable named FILE_NAME.bak
+```
+
+Explanation:
+
+- ```echo "The file name is: $FILE_NAME"```: Prints the value of the ```FILE_NAME``` variable.
+- ```echo "The file name is: ${FILE_NAME}.bak"```: Demonstrates the use of curly braces to clearly separate the variable name from the surrounding text. This is important when you want to concatenate a variable with other characters.
+
+**Variable Scope**
+
+Variables in shell scripts have either global or local scope.
+
+- **Global variables**: Are accessible from anywhere in the script, including within functions. By default, variables defined outside of any function are global.
+- **Local variables**: Are only accessible within the function where they are defined. You can declare a variable as local using the ```local``` keyword.
+
+```bash
+#!/bin/bash
+
+GLOBAL_VAR="This is a global variable"
+
+my_function() {
+  local LOCAL_VAR="This is a local variable"
+  echo "Inside the function:"
+  echo "Global variable: $GLOBAL_VAR"
+  echo "Local variable: $LOCAL_VAR"
+}
+
+my_function
+
+echo "Outside the function:"
+echo "Global variable: $GLOBAL_VAR"
+echo "Local variable: $LOCAL_VAR" # This will be empty because LOCAL_VAR is only accessible within the function
+```
+
+Explanation:
+
+- ```GLOBAL_VAR="This is a global variable"```: Defines a global variable.
+- ```local LOCAL_VAR="This is a local variable"```: Defines a local variable within the ```my_function``` function.
+- When you try to access ```LOCAL_VAR``` outside the function, it will be empty because it's out of scope.
+
+**Read-Only Variables**
+
+You can declare a variable as read-only using the ```readonly``` keyword. Once a variable is declared as read-only, its value cannot be changed.
+
+```bash
+#!/bin/bash
+
+readonly MY_CONSTANT="This is a constant value"
+
+echo "The value of the constant is: $MY_CONSTANT"
+
+# Attempting to change the value will result in an error
+# MY_CONSTANT="New value" # This will cause an error
+```
+
+Explanation:
+
+- ```readonly MY_CONSTANT="This is a constant value"```: Declares ```MY_CONSTANT``` as a read-only variable.
+- If you try to assign a new value to ```MY_CONSTANT```, the script will produce an error.
+
+**Unsetting Variables**
+
+You can remove a variable using the ```unset``` command. This removes the variable from the shell's memory.
+
+```bash
+#!/bin/bash
+
+MY_VARIABLE="This is a variable"
+
+echo "The value of the variable is: $MY_VARIABLE"
+
+unset MY_VARIABLE
+
+echo "The value of the variable is: $MY_VARIABLE" # This will be empty because the variable has been unset
+```
+
+Explanation:
+
+- ```unset MY_VARIABLE```: Removes the variable ```MY_VARIABLE```.
+- After unsetting the variable, accessing it will result in an empty value.
 
 #### <a name="chapter6part6.2"></a>Chapter 6 - Part 6.2: Basic Control Structures: if/else
 
+```if/else``` statements allow you to execute different blocks of code based on whether a condition is true or false.
+
+**The if Statement**
+
+The basic syntax of an ```if``` statement is:
+
+```bash
+if [ condition ]; then
+  # Code to execute if the condition is true
+fi
+```
+
+Explanation:
+
+- ```if [ condition ]```: The ```if``` keyword starts the statement, followed by a condition enclosed in square brackets ```[]```. It's crucial to have spaces between the brackets and the condition.
+- ```then```: Indicates the start of the code block to be executed if the condition is true.
+- ```# Code to execute if the condition is true```: The code block to be executed.
+- ```fi```: The ```fi``` keyword marks the end of the ```if``` statement.
+
+Example:
+
+```bash
+#!/bin/bash
+
+NUMBER=10
+
+if [ $NUMBER -gt 5 ]; then
+  echo "The number is greater than 5"
+fi
+```
+
+Explanation:
+
+- ```[ $NUMBER -gt 5 ]```: This is the condition. ```-gt``` is a comparison operator that means "greater than". The condition checks if the value of the ```NUMBER``` variable is greater than 5.
+- If the condition is true (which it is in this case), the message "The number is greater than 5" will be printed.
+
+**The if/else Statement**
+
+The ```if/else``` statement allows you to execute one block of code if the condition is true and another block of code if the condition is false.
+
+```bash
+if [ condition ]; then
+  # Code to execute if the condition is true
+else
+  # Code to execute if the condition is false
+fi
+```
+
+Explanation:
+
+- ```else```: Indicates the start of the code block to be executed if the condition is false.
+- ```# Code to execute if the condition is false```: The code block to be executed.
+
+Example:
+
+```bash
+#!/bin/bash
+
+NUMBER=3
+
+if [ $NUMBER -gt 5 ]; then
+  echo "The number is greater than 5"
+else
+  echo "The number is not greater than 5"
+fi
+```
+
+Explanation:
+
+- If the value of ```NUMBER``` is greater than 5, the first message will be printed. Otherwise, the second message will be printed. In this case, the second message will be printed because 3 is not greater than 5.
+
+**The if/elif/else Statement**
+
+The ```if/elif/else``` statement allows you to check multiple conditions in sequence.
+
+```bash
+if [ condition1 ]; then
+  # Code to execute if condition1 is true
+elif [ condition2 ]; then
+  # Code to execute if condition1 is false and condition2 is true
+else
+  # Code to execute if all conditions are false
+fi
+```
+
+Explanation:
+
+- ```elif [ condition2 ]```: The ```elif``` keyword (short for "else if") allows you to check another condition if the previous condition was false. You can have multiple ```elif``` blocks.
+- The ```else``` block is executed only if all the preceding conditions are false.
+
+Example:
+
+```bash
+#!/bin/bash
+
+NUMBER=7
+
+if [ $NUMBER -gt 10 ]; then
+  echo "The number is greater than 10"
+elif [ $NUMBER -gt 5 ]; then
+  echo "The number is greater than 5 but not greater than 10"
+else
+  echo "The number is not greater than 5"
+fi
+```
+
+Explanation:
+
+- The script first checks if ```NUMBER``` is greater than 10. If it is, the first message is printed.
+- If ```NUMBER``` is not greater than 10, the script checks if it's greater than 5. If it is, the second message is printed.
+- If ```NUMBER``` is not greater than either 10 or 5, the third message is printed. In this case, the second message will be printed because 7 is greater than 5 but not greater than 10.
+
+**Comparison Operators**
+
+The ```if``` statement uses comparison operators to evaluate conditions. Here are some common comparison operators for numbers and strings:
+
+**Numeric Comparison Operators:**
+
+|Operator	|Description	|Example|
+| :--: | :--: | :--: |
+|```-eq```	|Equal to	|```[ $A -eq $B ]```|
+|```-ne```	|Not equal to	|```[ $A -ne $B ]```|
+|```-gt```	|Greater than	|```[ $A -gt $B ]```|
+|```-ge```	|Greater than or equal to	|```[ $A -ge $B ]```|
+|```-lt```	|Less than	|```[ $A -lt $B ]```|
+|```-le```	|Less than or equal to	|```[ $A -le $B ]```|
+
+**String Comparison Operators:**
+
+
+|Operator	|Description	|Example|
+| :--: | :--: | :--: |
+|```=```	|Equal to	|```[ "$A" = "$B" ]```|
+|```!=```	|Not equal to	|```[ "$A" != "$B" ]```|
+|```-z```	|True if string is empty	|```[ -z "$A" ]```|
+|```-n```	|True if string is not empty	|```[ -n "$A" ]```|
+
+**File Test Operators:**
+
+
+|Operator	|Description	|Example|
+| :--: | :--: | :--: |
+|```-e```	|True if file exists	|[``` -e "file.txt" ]```|
+|```-f```	|True if file exists and is a regular file	|```[ -f "file.txt" ]```|
+|```-d```	|True if file exists and is a directory	|```[ -d "mydir" ]```|
+|```-r```	|True if file exists and is readable	|```[ -r "file.txt" ]```|
+|```-w```	|True if file exists and is writable	|```[ -w "file.txt" ]```|
+|```-x```	|True if file exists and is executable	|```[ -x "script.sh" ]```|
+
+Important Notes:
+
+- When comparing strings, it's a good practice to enclose the variables in double quotes (```"$A"```) to prevent word splitting and globbing issues.
+- Numeric comparison operators should be used for comparing numbers, and string comparison operators should be used for comparing strings.
+- File test operators are used to check the properties of files.
+
+**Logical Operators**
+
+You can combine multiple conditions using logical operators:
+
+
+|Operator	|Description	|Example|
+| :--: | :--: | :--: |
+|```&&```	|```AND```	|```[ condition1 ] && [ condition2 ]```|
+|```||``` |```OR``` |```[ condition1 ] || [ condition2 ]```|
+|```!```	|```NOT```	|```[ ! condition ]```|
+
+Example:
+
+```bash
+#!/bin/bash
+
+USER_NAME="john"
+FILE_NAME="my_document.txt"
+
+if [ "$USER_NAME" = "john" ] && [ -e "$FILE_NAME" ]; then
+  echo "User is john and the file exists"
+fi
+
+if [ "$USER_NAME" = "john" ] || [ "$FILE_NAME" = "another_file.txt" ]; then
+  echo "User is john or the file name is another_file.txt"
+fi
+
+if [ ! -z "$USER_NAME" ]; then
+  echo "User name is not empty"
+fi
+```
+
+Explanation:
+
+- The first ```if``` statement uses the ```&&``` operator to check if both conditions are true: the user name is "john" and the file "my_document.txt" exists.
+- The second ```if``` statement uses the ```||``` operator to check if either condition is true: the user name is "john" or the file name is "another_file.txt".
+- The third ```if``` statement uses the ```!``` operator to check if the user name is not empty.
+
 #### <a name="chapter6part6.3"></a>Chapter 6 - Part 6.3: Practical Examples and Demonstrations
+
+**Example 1: Checking if a File Exists**
+
+This script checks if a file exists and prints a message accordingly.
+
+```bash
+#!/bin/bash
+
+FILE_NAME="my_document.txt"
+
+if [ -e "$FILE_NAME" ]; then
+  echo "The file $FILE_NAME exists"
+else
+  echo "The file $FILE_NAME does not exist"
+fi
+```
+
+Explanation:
+
+- The script uses the ```-e``` file test operator to check if the file "my_document.txt" exists.
+- If the file exists, the first message is printed. Otherwise, the second message is printed.
+
+**Example 2: Checking User Input**
+
+This script prompts the user for input and checks if the input is a number.
+
+```bash
+#!/bin/bash
+
+read -p "Enter a number: " INPUT
+
+if [[ "$INPUT" =~ ^[0-9]+$ ]]; then
+  echo "You entered a number: $INPUT"
+else
+  echo "Invalid input. Please enter a number."
+fi
+```
+
+Explanation:
+
+- ```read -p "Enter a number: " INPUT```: Prompts the user to enter a number and stores the input in the ```INPUT``` variable.
+- ```[[ "$INPUT" =~ ^[0-9]+$ ]]```: This is a more advanced conditional expression that uses regular expressions. ```=~``` is the regular expression matching operator. ```^[0-9]+$``` checks if the input consists of one or more digits from the beginning (```^```) to the end (```$```) of the string.
+- If the input is a number, the first message is printed. Otherwise, the second message is printed.
+
+**Example 3: Determining File Type**
+
+This script determines whether a given file is a regular file or a directory.
+
+```bash
+#!/bin/bash
+
+FILE="test.txt"
+
+if [ -f "$FILE" ]; then
+  echo "$FILE is a regular file."
+elif [ -d "$FILE" ]; then
+  echo "$FILE is a directory."
+else
+  echo "$FILE is neither a regular file nor a directory."
+fi
+```
+
+Explanation:
+
+- The script first checks if the file is a regular file using the ```-f``` operator.
+- If it's not a regular file, it checks if it's a directory using the ```-d``` operator.
+- If it's neither a regular file nor a directory, it prints a message indicating that.
 
 ## <a name="chapter7"></a>Chapter 7: Networking Fundamentals
 
