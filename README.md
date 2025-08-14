@@ -6101,43 +6101,1129 @@ sudo cp /etc/fstab.bak /etc/fstab
 
 #### <a name="chapter6part1"></a>Chapter 6 - Part 1: Introduction to Text Streams and Redirection: `>`, `>>`, `<`
 
+Text streams and redirection are fundamental concepts in Linux that allow you to manipulate and control the flow of data between commands and files. Understanding these concepts is crucial for effective command-line usage and forms the basis for more advanced scripting techniques. This lesson will provide a comprehensive introduction to text streams and redirection operators, including ```>```, ```>>```, and ```<```.
+
 #### <a name="chapter6part1.1"></a>Chapter 6 - Part 1.1: Understanding Text Streams
+
+In Linux, almost everything is treated as a file, including input and output. When you run a command, it typically interacts with three standard text streams:
+
+- **Standard Input (stdin)**: This is the default source of input for a command. By default, stdin is connected to your keyboard.
+- **Standard Output (stdout)**: This is the default destination for the normal output of a command. By default, stdout is connected to your terminal screen.
+- **Standard Error (stderr)**: This is the default destination for error messages from a command. By default, stderr is also connected to your terminal screen.
+These streams are represented by file descriptors: 0 for stdin, 1 for stdout, and 2 for stderr. While you don't usually need to refer to these numbers directly when using basic redirection, understanding their existence is helpful for more advanced techniques.
 
 #### <a name="chapter6part1.2"></a>Chapter 6 - Part 1.2: Redirection Operators: > (Stdout), >> (Stdout Append), and < (Stdin)
 
+Redirection operators allow you to change the default destinations of these streams.
+
+**The > Operator: Redirecting Standard Output**
+
+The ```>``` operator redirects the standard output (stdout) of a command to a file. If the file already exists, it will be overwritten. If the file doesn't exist, it will be created.
+
+**Basic Example:**
+
+```bash
+ls -l > file_list.txt
+```
+
+This command lists the files and directories in the current directory (using ```ls -l```) and redirects the output to a file named ```file_list.txt```. If ```file_list.txt``` already exists, its contents will be replaced with the output of the ```ls -l``` command. If it doesn't exist, a new file named ```file_list.txt``` will be created, and the output will be written to it.
+
+**Example with a Non-Existent File:**
+
+If you run the above command and ```file_list.txt``` doesn't exist, Linux will create it. You can then view the contents of the file using ```cat file_list.txt```.
+
+**Example with an Existing File:**
+
+If ```file_list.txt``` already exists and contains, for example, the text "Old content", running ```ls -l > file_list.txt``` will replace "Old content" with the output of the ```ls -l``` command.
+
+**Important Note: The ```>``` operator always overwrites the file. This can lead to data loss if you're not careful.**
+
+**The >> Operator: Appending Standard Output**
+
+The ```>>``` operator redirects the standard output (stdout) of a command to a file, but instead of overwriting the file, it appends the output to the end of the file. If the file doesn't exist, it will be created.
+
+**Basic Example:**
+
+```bash
+echo "This is some text" >> my_file.txt
+```
+
+This command adds the text "This is some text" to the end of the file ```my_file.txt```. If ```my_file.txt``` doesn't exist, it will be created.
+
+**Example with a Non-Existent File:**
+
+If my_file.txt doesn't exist, running the above command will create it and add the text "This is some text" to the file.
+
+Example with an Existing File:
+
+If ```my_file.txt``` already exists and contains the text "Existing content", running ```echo "This is some text" >> my_file.txt``` will result in ```my_file.txt``` containing "Existing content\nThis is some text" (where ```\n``` represents a newline character).
+
+**Use Case: Logging**
+
+The ```>>``` operator is commonly used for logging information to a file. For example, you might append timestamps and messages to a log file to track the activity of a script or program.
+
+**The < Operator: Redirecting Standard Input**
+
+The ```<``` operator redirects the standard input (stdin) of a command to come from a file instead of the keyboard.
+
+**Basic Example:**
+
+```bash
+wc -l < my_file.txt
+```
+
+This command counts the number of lines in the file ```my_file.txt``` using the ```wc -l``` command. Instead of typing the content directly into the terminal, the content of ```my_file.txt``` is fed as input to the ```wc -l``` command.
+
+**Example with mail command:**
+
+Imagine you have a file named ```email_body.txt``` containing the body of an email. You can use the ```<``` operator to send the email using the ```mail``` command (assuming you have a mail client configured).
+
+```bash
+mail -s "Subject of the email" recipient@example.com < email_body.txt
+```
+
+This command sends an email to ```recipient@example.com``` with the subject "Subject of the email" and the content of the email taken from the ```email_body.txt``` file.
+
+**Example with sort command:**
+
+If you have a file named ```unsorted_names.txt``` with a list of names, one name per line, you can sort the names and print them to the terminal using:
+
+```bash
+sort < unsorted_names.txt
+```
+
 #### <a name="chapter6part1.3"></a>Chapter 6 - Part 1.3: Combining Redirection Operators
+
+You can combine redirection operators to achieve more complex input/output manipulation.
+
+**Example: Redirecting both stdout and stderr**
+
+To redirect both standard output and standard error to the same file, you can use the ```&>``` operator (or ```2>&1 > filename```, which is more portable across different shells).
+
+```bash
+./my_script.sh &> output.txt
+```
+
+This command runs the script ```my_script.sh``` and redirects both its standard output and standard error to the file ```output.txt```. This is useful for capturing all output from a script, including any error messages.
+
+**Example: Redirecting stdout to a file and stderr to the terminal**
+
+Sometimes you want to save the normal output of a command to a file but still see any error messages in the terminal. You can achieve this using file descriptor redirection:
+
+```bash
+./my_script.sh > output.txt 2>&1
+```
+
+This command redirects stdout to ```output.txt``` and then redirects stderr (file descriptor 2) to the same location as stdout (file descriptor 1), which is the terminal.
 
 #### <a name="chapter6part2"></a>Chapter 6 - Part 2: Piping Commands Together: `|`
 
+Piping is a fundamental concept in Linux that allows you to chain commands together, using the output of one command as the input of another. This creates powerful workflows for manipulating data and performing complex tasks. The ```|``` symbol, often referred to as the "pipe," is the key to this functionality. It enables you to build command sequences that are more efficient and readable than running each command separately.
+
 #### <a name="chapter6part2.1"></a>Chapter 6 - Part 2.1: Understanding the Pipe Operator |
+
+The pipe operator ```|``` takes the standard output (stdout) of the command on its left and redirects it as the standard input (stdin) of the command on its right. Think of it as a conveyor belt that moves data from one process to another.
+
+**Standard Output (stdout) and Standard Input (stdin)**
+
+Before diving deeper, let's clarify stdout and stdin.
+
+- **Standard Output (stdout)**: This is where a command normally sends its output (e.g., the results of a calculation, the contents of a file, or an error message). By default, stdout is displayed on your terminal.
+- **Standard Input (stdin)**: This is where a command normally receives its input. By default, stdin comes from your keyboard.
+
+The pipe operator redirects stdout from one command to stdin of another, allowing you to process data in a sequential manner.
+
+**Basic Syntax**
+
+The syntax for using the pipe operator is straightforward:
+
+```bash
+command1 | command2 | command3 ...
+```
+
+Each ```|``` connects the stdout of the command on its left to the stdin of the command on its right. The commands are executed in order from left to right.
+
+**Example 1: Listing Files and Counting Lines**
+
+Let's say you want to know how many files are in your current directory. You could use ```ls``` to list the files and then ```wc -l``` (word count with the ```-l``` option to count lines) to count the number of lines in the output.
+
+```bash
+ls | wc -l
+```
+
+In this example:
+
+- ```ls``` lists all the files and directories in the current directory, sending the output to stdout.
+- The ```|``` operator takes the stdout from ```ls``` and redirects it to the stdin of ```wc -l```.
+- ```wc -l``` receives the list of files as its input and counts the number of lines. Each line represents a file or directory.
+- ```wc -l``` then prints the total number of lines (files/directories) to the terminal.
+
+**Example 2: Finding Specific Processes**
+
+Suppose you want to find all processes related to the ```firefox``` browser. You can use ```ps aux``` to list all running processes and then use ```grep``` to filter the output for lines containing "firefox".
+
+```bash
+ps aux | grep firefox
+```
+
+Here's how it works:
+
+- ```ps aux``` lists all running processes with detailed information, sending the output to stdout.
+- The ```|``` operator redirects the stdout from ```ps aux``` to the stdin of ```grep firefox```.
+- ```grep firefox``` searches the input (the process list) for lines containing the string "firefox".
+- ```grep firefox``` then prints the matching lines (processes related to Firefox) to the terminal.
+
+**Example 3: Combining cat, sort, and uniq**
+
+Let's say you have a file named ```names.txt``` containing a list of names, some of which are duplicated. You want to extract the unique names in alphabetical order. You can achieve this using ```cat```, ```sort```, and ```uniq```.
+
+First, create the ```names.txt``` file using ```nano```:
+
+```bash
+nano names.txt
+```
+
+Add the following names to the file:
+
+```
+Alice
+Bob
+Charlie
+Alice
+David
+Bob
+Eve
+```
+
+Save the file and exit ```nano```. Now, run the following command:
+
+```bash
+cat names.txt | sort | uniq
+```
+
+Explanation:
+
+- ```cat names.txt``` reads the contents of ```names.txt``` and sends it to stdout.
+- ```sort``` receives the contents of ```names.txt``` from stdin, sorts the lines alphabetically, and sends the sorted output to stdout.
+- ```uniq``` receives the sorted output from stdin, removes any adjacent duplicate lines, and sends the unique lines to stdout.
+
+The final output will be:
+
+```Alice
+Bob
+Charlie
+David
+Eve
+```
+
+**Example 4: Using head and tail with Piping**
+
+The ```head``` and ```tail``` commands are useful for viewing the beginning and end of a file, respectively. You can combine them with pipes to extract specific sections of a file. For example, to get the 11th to 20th lines of a file named ```data.txt```, you can use:
+
+```bash
+cat data.txt | head -n 20 | tail -n 10
+```
+
+Explanation:
+
+- ```cat data.txt``` outputs the entire content of the file.
+- ```head -n 20``` takes the first 20 lines of the input.
+- ```tail -n 10``` takes the last 10 lines of the input from ```head```, effectively extracting lines 11 to 20.
 
 #### <a name="chapter6part2.2"></a>Chapter 6 - Part 2.2: Advanced Piping Techniques
 
+**Piping to Multiple Commands**
+
+While a single pipe connects two commands, you can chain multiple pipes together to create more complex workflows. For example:
+
+```bash
+cat large_file.txt | grep "error" | sort | uniq -c | less
+```
+
+This command does the following:
+
+- ```cat large_file.txt```: Outputs the content of a large file.
+- ```grep "error"```: Filters the output to only include lines containing "error".
+- ```sort```: Sorts the error lines alphabetically.
+- ```uniq -c```: Counts the occurrences of each unique error line.
+- ```less```: Displays the results in a scrollable format.
+
+**Using tee for Output Redirection and Display**
+
+Sometimes, you might want to both save the output of a command to a file and view it on the terminal. The ```tee``` command allows you to do this.
+
+```bash
+ls -l | tee output.txt
+```
+
+This command lists the files in the current directory and saves the output to ```output.txt``` while also displaying it on the terminal.
+
+**Error Handling with Pipes**
+
+By default, the pipe operator only redirects standard output (stdout). Standard error (stderr) is still sent directly to the terminal. If you want to include stderr in the pipe, you need to redirect it. You can redirect stderr to stdout using ```2>&1```.
+
+```bash
+command 2>&1 | grep "error"
+```
+
+This command redirects stderr to stdout before piping it to ```grep```, ensuring that any error messages are also filtered by ```grep```.
+
 #### <a name="chapter6part3"></a>Chapter 6 - Part 3: Basic Text Filtering with `grep`
+
+Text filtering is a crucial skill for anyone working with Linux. It allows you to extract specific information from large amounts of text data, making it easier to analyze logs, configuration files, and other text-based resources. The ```grep``` command is a powerful tool for this purpose, enabling you to search for patterns within files and streams of text. This lesson will provide a comprehensive introduction to ```grep```, covering its basic usage, options, and practical applications. Building upon the concepts of text streams and piping from the previous lesson, you'll learn how to effectively use ```grep``` to filter and manipulate text data.
 
 #### <a name="chapter6part3.1"></a>Chapter 6 - Part 3.1: Basic grep Usage
 
+The ```grep``` command (Global Regular Expression Print) searches for lines in a file (or standard input) that match a given pattern. The basic syntax is:
+
+```bash
+grep [options] pattern [file(s)]
+```
+
+- ```grep```: The command itself.
+- ```[options]```: Optional flags that modify the behavior of ```grep```. We'll cover some of the most useful options later.
+- ```pattern```: The search term or regular expression you want to find.
+- ```[file(s)]```: The name of the file(s) you want to search in. If no file is specified, ```grep``` reads from standard input (which can be the output of another command piped to ```grep```).
+
+**Example 1: Searching for a Simple String in a File**
+
+Let's say you have a file named ```example.txt``` with the following content:
+
+```bash
+This is a line of text.
+This line contains the word "example".
+Another line of text.
+example file
+```
+
+To find all lines containing the word "example", you would use the following command:
+
+```bash
+grep example example.txt
+```
+
+This will output:
+
+```
+This line contains the word "example".
+example file
+```
+
+**Example 2: Searching Standard Input**
+
+You can also use ```grep``` with standard input by piping the output of another command to it. For example, to find all processes that contain the word "firefox" in their name, you can use the ```ps``` command (which lists running processes) and pipe its output to ```grep```:
+
+```bash
+ps aux | grep firefox
+```
+
+This will output any lines from ```ps aux``` that contain "firefox", effectively showing you any running Firefox processes.
+
+**Example 3: Case Sensitivity**
+
+By default, ```grep``` is case-sensitive. This means that ```grep example example.txt``` will not match "Example" or "EXAMPLE". To perform a case-insensitive search, use the -i option:
+
+```bash
+grep -i example example.txt
+```
+
+This will now match "example", "Example", "EXAMPLE", and any other variation of the word with different capitalization.
+
 #### <a name="chapter6part3.2"></a>Chapter 6 - Part 3.2: Common grep Options
+
+```grep``` has many options that can be used to modify its behavior. Here are some of the most commonly used options:
+
+- ```-i```: Case-insensitive search (as shown above).
+- ```-v```: Invert the match. This option tells ```grep``` to print only the lines that do not match the pattern.
+- ```-n```: Print the line number along with the matching line.
+- ```-c```: Print only a count of the matching lines, not the lines themselves.
+- ```-l```: Print only the names of the files that contain matching lines.
+- ```-r``` or ```-R```: Recursive search. This option tells ```grep``` to search for the pattern in all files within a directory and its subdirectories. ```-r``` follows symbolic links, while ```-R``` does not.
+- ```-w```: Match whole words only. This option ensures that the pattern is matched only when it appears as a complete word, not as part of a larger word.
+- ```-x```: Match whole lines only. This option ensures that the pattern is matched only when it matches the entire line.
+- ```-o```: Print only the matching part of the line.
+- ```-A num```: Print num lines after the matching line.
+- ```-B num```: Print num lines before the matching line.
+- ```-C num```: Print num lines around the matching line (both before and after).
+
+**Example 1: Inverting the Match with -v**
+
+To find all lines in ```example.txt``` that do not contain the word "example", use the ```-v``` option:
+
+```bash
+grep -v example example.txt
+```
+
+This will output:
+
+```
+This is a line of text.
+Another line of text.
+```
+
+**Example 2: Printing Line Numbers with -n**
+
+To print the line numbers along with the matching lines, use the ```-n``` option:
+
+```bash
+grep -n example example.txt
+```
+
+This will output:
+
+```
+2:This line contains the word "example".
+4:example file
+```
+
+**Example 3: Counting Matching Lines with -c**
+
+To count the number of lines that contain the word "example", use the ```-c``` option:
+
+```bash
+grep -c example example.txt
+```
+
+This will output:
+
+```
+2
+```
+
+**Example 4: Recursive Search with -r**
+
+Let's say you have a directory named ```my_directory``` with the following structure:
+
+```
+my_directory/
+├── file1.txt
+├── file2.txt
+└── subdirectory/
+    └── file3.txt
+```
+
+And the files contain the following:
+
+- ```file1.txt```: "This file contains the word apple."
+- ```file2.txt```: "This file does not contain the word."
+- ```subdirectory/file3.txt```: "Another file with the word apple."
+
+To search for the word "apple" in all files within ```my_directory``` and its subdirectories, use the ```-r``` option:
+
+```bash
+grep -r apple my_directory
+```
+
+This will output:
+
+```
+my_directory/file1.txt:This file contains the word apple.
+my_directory/subdirectory/file3.txt:Another file with the word apple.
+```
+
+**Example 5: Matching Whole Words with -w**
+
+Using the same ```example.txt``` file as before, let's search for the whole word "example":
+
+```bash
+grep -w example example.txt
+```
+
+This will output:
+
+```
+This line contains the word "example".
+example file
+```
+
+Without the ```-w``` option, ```grep``` would also match "examples" or "exampled" if they were present in the file.
+
+**Example 6: Matching Whole Lines with -x**
+
+To find lines that exactly match "example file", use the ```-x``` option:
+
+```bash
+grep -x "example file" example.txt
+```
+
+This will output:
+
+```
+example file
+```
+
+**Example 7: Printing Only the Matching Part with -o**
+
+To print only the matching part of the line, use the ```-o``` option:
+
+```bash
+grep -o example example.txt
+```
+
+This will output:
+
+```
+example
+example
+```
+
+**Example 8: Printing Context Lines with -A, -B, and -C**
+
+To print 1 line after each matching line:
+
+```bash
+grep -A 1 example example.txt
+```
+
+Output:
+
+```
+This line contains the word "example".
+Another line of text.
+example file
+```
+
+To print 1 line before each matching line:
+
+```bash
+grep -B 1 example example.txt
+```
+
+Output:
+
+```
+This is a line of text.
+This line contains the word "example".
+example file
+```
+
+To print 1 line around each matching line:
+
+```bash
+grep -C 1 example example.txt
+```
+
+Output:
+
+```
+This is a line of text.
+This line contains the word "example".
+Another line of text.
+example file
+```
 
 #### <a name="chapter6part3.3"></a>Chapter 6 - Part 3.3: Regular Expressions with grep
 
+```grep's``` true power comes from its ability to use regular expressions to define complex search patterns. Regular expressions are a sequence of characters that define a search pattern. They are a powerful tool for matching text in a flexible and precise way. A full explanation of regular expressions is beyond the scope of this lesson, but we'll cover some basic concepts and examples.
+
+**Basic Regular Expression Metacharacters**
+
+- ```.``` (dot): Matches any single character except a newline.
+- ```*``` (asterisk): Matches the preceding character zero or more times.
+- ```+``` (plus): Matches the preceding character one or more times. (Requires ```grep -E``` or ```egrep```)
+- ```?``` (question mark): Matches the preceding character zero or one time. (Requires ```grep -E``` or ```egrep```)
+- ```[]``` (square brackets): Matches any single character within the brackets. For example, ```[aeiou]``` matches any vowel.
+- ```[^]``` (caret inside brackets): Matches any single character not within the brackets. For example, ```[^aeiou]``` matches any character that is not a vowel.
+- ```^``` (caret): Matches the beginning of a line.
+- ```$``` (dollar sign): Matches the end of a line.
+- ```\``` (backslash): Escapes a special character, allowing you to match it literally. For example, ```\.``` matches a literal dot.
+- ```|``` (pipe): Specifies an "or" condition. Matches either the expression before or after the pipe. (Requires ```grep -E``` or ```egrep```)
+- ```()``` (parentheses): Groups parts of a regular expression. (Requires ```grep -E``` or ```egrep```)
+
+**Example 1: Matching Any Character with .**
+
+To find lines that contain "ex" followed by any character and then "mple", you can use the following command:
+
+```bash
+grep "ex.mple" example.txt
+```
+
+This will match "example" because the . matches the "a" in "example".
+
+**Example 2: Matching Zero or More Occurrences with**
+
+To find lines that contain "a" followed by zero or more "b"s and then "c", you can use the following command:
+
+```bash
+grep "ab*c" example.txt
+```
+
+This will match "ac", "abc", "abbc", "abbbc", and so on.
+
+**Example 3: Matching the Beginning of a Line with ^**
+
+To find lines that start with "This", use the following command:
+
+```bash
+grep "^This" example.txt
+```
+
+This will output:
+
+```
+This is a line of text.
+This line contains the word "example".
+```
+
+**Example 4: Matching the End of a Line with $**
+
+To find lines that end with "text.", use the following command:
+
+```bash
+grep "text.$" example.txt
+```
+
+This will output:
+
+```
+This is a line of text.
+```
+
+**Example 5: Using Character Classes with []**
+
+To find lines that contain a vowel, use the following command:
+
+```bash
+grep "[aeiou]" example.txt
+```
+
+This will match any line that contains at least one vowel.
+
+**Example 6: Excluding Characters with [^]**
+
+To find lines that do not contain a vowel, use the following command:
+
+```bash
+grep "[^aeiou]" example.txt
+```
+
+This will match any line that contains at least one character that is not a vowel.
+
+**Extended Regular Expressions with grep -E or egrep**
+
+For more complex regular expressions, you can use the ```-E``` option with ```grep``` or use the ```egrep``` command (which is equivalent to ```grep -E```). This enables extended regular expression features like ```+```, ```?```, ```|```, and ```()```.
+
+**Example 7: Matching One or More Occurrences with +**
+
+To find lines that contain "a" followed by one or more "b"s and then "c", you can use the following command:
+
+```bash
+grep -E "ab+c" example.txt
+```
+
+This will match "abc", "abbc", "abbbc", and so on, but it will not match "ac".
+
+**Example 8: Matching Zero or One Occurrence with ?**
+
+To find lines that contain "a" followed by zero or one "b" and then "c", you can use the following command:
+
+```bash
+grep -E "ab?c" example.txt
+```
+
+This will match "ac" and "abc", but it will not match "abbc".
+
+**Example 9: Using "or" with |**
+
+To find lines that contain either "apple" or "banana", you can use the following command:
+
+```bash
+grep -E "apple|banana" example.txt
+```
+
+**Example 10: Grouping with ()**
+
+To find lines that contain "group" followed by "1" or "2", you can use the following command:
+
+```bash
+grep -E "group(1|2)" example.txt
+```
+
 #### <a name="chapter6part4"></a>Chapter 6 - Part 4: Introduction to Shell Scripting: Creating a Simple Script
+
+Shell scripting is a powerful tool for automating tasks in Linux. It allows you to combine multiple commands into a single script, making complex operations easier to execute and repeat. This lesson introduces the fundamental concepts of shell scripting, focusing on creating and running simple scripts, understanding variables, and using basic control structures. By the end of this lesson, you'll be able to write basic scripts to automate common tasks and lay the foundation for more advanced scripting techniques.
 
 #### <a name="chapter6part4.1"></a>Chapter 6 - Part 4.1: Creating Your First Shell Script
 
+A shell script is a plain text file containing a sequence of commands that the shell executes. Let's create a simple script that displays a greeting message.
+
+- **Create a new file**: Use a text editor like nano or vim to create a new file named ```greeting.sh```.
+
+```bash
+nano greeting.sh
+```
+
+- **Add the shebang**: The first line of a shell script should specify the interpreter to use. This is done using the shebang (```#!```) followed by the path to the shell executable. For Bash, the most common shell, this is usually ```/bin/bash``` or ```/usr/bin/env bash```. Using ```/usr/bin/env bash``` is more portable as it relies on the ```env``` command to find the bash executable in the system's PATH.
+
+```bash
+#!/usr/bin/env bash
+```
+
+- **Add commands**: Add the following commands to the script:
+
+```bash
+#!/usr/bin/env bash
+
+# This script displays a greeting message
+echo "Hello, world!"
+echo "Today is $(date +%Y-%m-%d)."
+```
+
+  - The ```echo``` command displays text on the terminal.
+
+  - ```$(date +%Y-%m-%d)``` is a command substitution that executes the ```date``` command and inserts its output into the string. The ```date``` command with the ```+%Y-%m-%d``` format option displays the current date in the format YYYY-MM-DD.
+
+- **Save the file**: Save the file and exit the text editor. In ```nano```, you can do this by pressing ```Ctrl+X```, then ```Y``` to confirm saving, and then ```Enter```.
+
 #### <a name="chapter6part4.2"></a>Chapter 6 - Part 4.2: Running Shell Scripts
+
+Before you can run the script, you need to make it executable.
+
+- **Make the script executable**: Use the ```chmod``` command to add execute permissions to the script
+
+```bash
+chmod +x greeting.sh
+```
+
+  - ```chmod``` is the command for changing file permissions.
+  - ```+x``` adds execute permission to the file.
+
+- **Run the script**: You can run the script by typing its path. If the script is in the current directory, you can run it using ```./greeting.sh```.
+
+```bash
+./greeting.sh
+```
+
+This will execute the commands in the script and display the greeting message along with the current date.
 
 #### <a name="chapter6part4.3"></a>Chapter 6 - Part 4.3: Variables in Shell Scripts
 
+Variables are used to store data in shell scripts. You can assign values to variables and use them later in the script.
+
+**Defining Variables**
+
+To define a variable, use the following syntax:
+
+```bash
+variable_name="value"
+```
+
+- Variable names should start with a letter and can contain letters, numbers, and underscores.
+- There should be no spaces around the ```=``` sign.
+- Values can be enclosed in single quotes (```'```) or double quotes (```"```). Double quotes allow variable substitution and command substitution, while single quotes treat the content literally.
+
+Example:
+
+```bash
+#!/usr/bin/env bash
+
+name="Alice"
+greeting="Hello, $name!"
+echo "$greeting"
+
+date_string='Today is $(date +%Y-%m-%d).'
+echo "$date_string"
+```
+
+In this example:
+
+- ```name``` is assigned the value "Alice".
+- ```greeting``` is assigned a string that includes the value of the ```name``` variable.
+- The first ```echo``` command will output "Hello, Alice!".
+- The second ```echo``` command will output "Today is $(date +%Y-%m-%d)." because single quotes prevent command substitution.
+
+**Using Variables**
+
+To access the value of a variable, use the ```$``` sign followed by the variable name.
+
+```bash
+#!/usr/bin/env bash
+
+name="Bob"
+echo "Hello, $name!"
+```
+
+This script will output "Hello, Bob!".
+
+**Environment Variables**
+
+Environment variables are variables that are available to all processes in the system. Some common environment variables include:
+
+- ```HOME: The path to the user's home directory.
+- ```USER: The username of the current user.
+- ```PATH: A list of directories where the shell looks for executable files.
+
+You can access environment variables in the same way as regular variables.
+
+```bash
+#!/usr/bin/env bash
+
+echo "Your home directory is: $HOME"
+echo "Your username is: $USER"
+```
+
+**Read-Only Variables**
+
+You can declare a variable as read-only using the ```readonly``` keyword. Once a variable is declared read-only, its value cannot be changed.
+
+```bash
+#!/usr/bin/env bash
+
+readonly PI=3.14
+echo "The value of PI is: $PI"
+
+# Attempting to change the value will result in an error
+PI=3.14159
+```
+
+This will output an error message because you are trying to modify a read-only variable.
+
 #### <a name="chapter6part4.4"></a>Chapter 6 - Part 4.4: Basic Control Structures: if/else
+
+Control structures allow you to control the flow of execution in a script based on certain conditions. The ```if/else``` statement is a fundamental control structure that allows you to execute different blocks of code depending on whether a condition is true or false.
+
+**The if Statement**
+
+The basic syntax of the ```if``` statement is:
+
+```bash
+if [ condition ]; then
+  # Code to execute if the condition is true
+fi
+```
+
+- ```if```: Keyword that starts the ```if``` statement.
+- ```[ condition ]```: The condition to be evaluated. The spaces around the condition inside the square brackets are important.
+- ```then```: Keyword that indicates the start of the block of code to be executed if the condition is true.
+- ```fi```: Keyword that ends the ```if``` statement.
+
+Example:
+
+```bash
+#!/usr/bin/env bash
+
+num=10
+if [ $num -gt 5 ]; then
+  echo "$num is greater than 5"
+fi
+```
+
+- ```-gt``` is a comparison operator that checks if the left operand is greater than the right operand.
+
+**The if/else Statement**
+
+The ```if/else``` statement allows you to execute one block of code if the condition is true and another block of code if the condition is false.
+
+```bash
+if [ condition ]; then
+  # Code to execute if the condition is true
+else
+  # Code to execute if the condition is false
+fi
+```
+
+Example:
+
+```bash
+#!/usr/bin/env bash
+
+num=3
+
+if [ $num -gt 5 ]; then
+  echo "$num is greater than 5"
+else
+  echo "$num is not greater than 5"
+fi
+```
+
+**The if/elif/else Statement**
+
+The ```if/elif/else``` statement allows you to check multiple conditions and execute different blocks of code based on which condition is true.
+
+```bash
+if [ condition1 ]; then
+  # Code to execute if condition1 is true
+elif [ condition2 ]; then
+  # Code to execute if condition1 is false and condition2 is true
+else
+  # Code to execute if both condition1 and condition2 are false
+fi
+```
+
+Example:
+
+```bash
+#!/usr/bin/env bash
+
+num=7
+
+if [ $num -gt 10 ]; then
+  echo "$num is greater than 10"
+elif [ $num -gt 5 ]; then
+  echo "$num is greater than 5 but not greater than 10"
+else
+  echo "$num is not greater than 5"
+fi
+```
+
+**Common Comparison Operators**
+
+Here are some common comparison operators used in ```if``` statements:
+
+- ```-eq```: Equal to
+- ```-ne```: Not equal to
+- ```-gt```: Greater than
+- ```-lt```: Less than
+- ```-ge```: Greater than or equal to
+- ```-le```: Less than or equal to
+- ```=```: String equality
+- ```!=```: String inequality
+- ```-z```: True if the string is empty
+- ```-n```: True if the string is not empty
+- ```-f```: True if the file exists and is a regular file
+- ```-d```: True if the file exists and is a directory
+- ```-e```: True if the file exists
+
+Example using string comparison:
+
+```bash
+#!/usr/bin/env bash
+
+name="Alice"
+if [ "$name" = "Alice" ]; then
+  echo "Hello, Alice!"
+else
+  echo "Hello, stranger!"
+fi
+```
+
+Example using file existence check:
+
+```bash
+#!/usr/bin/env bash
+
+file="my_file.txt"
+
+if [ -f "$file" ]; then
+  echo "$file exists and is a regular file"
+else
+  echo "$file does not exist or is not a regular file"
+fi
+```
+
 
 #### <a name="chapter6part5"></a>Chapter 6 - Part 5: Running Shell Scripts: `chmod +x`, `./script.sh`
 
+This lesson bridges the gap between creating simple shell scripts and actually executing them. We'll cover the crucial step of making a script executable using ```chmod +x``` and then demonstrate how to run it using ```./script.sh```. Understanding these steps is fundamental to automating tasks and leveraging the power of shell scripting in Linux.
+
 #### <a name="chapter6part5.1"></a>Chapter 6 - Part 5.1: Making a Script Executable: chmod +x
+
+Before you can run a shell script, the system needs to know that it's an executable file. By default, newly created text files don't have execute permissions. The ```chmod``` command is used to change file permissions, and the ```+x``` option specifically adds execute permission to a file.
+
+**Understanding File Permissions**
+
+In Linux, file permissions are represented by a string of characters like ```-rwxr-xr--```. Let's break this down:
+
+- The first character indicates the file type (e.g., ```-``` for regular file, ```d``` for directory).
+- The next three characters (```rwx```) represent the permissions for the owner of the file.
+- The following three characters (```r-x```) represent the permissions for the group associated with the file.
+- The last three characters (```r--```) represent the permissions for others (users who are neither the owner nor in the group).
+
+Each set of three characters represents:
+
+- ```r```: Read permission (allows viewing the file's contents)
+- ```w```: Write permission (allows modifying the file's contents)
+- ```x```: Execute permission (allows running the file as a program)
+
+A ```-``` in place of ```r```, ```w```, or ```x``` means that permission is denied.
+
+**Using chmod +x**
+
+The ```chmod +x``` command adds execute permission to a file for the owner, group, and others.
+
+**Example:**
+
+Let's say you have a script named ```my_script.sh```. To make it executable, you would run:
+
+```bash
+chmod +x my_script.sh
+```
+
+To verify that the permission has been changed, use the ```ls -l``` command:
+
+```bash
+ls -l my_script.sh
+```
+
+The output should now show something like ```-rwxr-xr-x my_script.sh```, indicating that the execute permission (```x```) is set for the owner, group, and others.
+
+**Numeric Representation of Permissions**
+
+While ```chmod +x``` is a user-friendly way to add execute permissions, ```chmod``` can also use a numeric representation. Each permission (read, write, execute) is assigned a numeric value:
+
+- ```r``` = 4
+- ```w``` = 2
+- ```x``` = 1
+
+To set permissions using numbers, you add up the values for each category (owner, group, others). For example, to give the owner read, write, and execute permissions (4+2+1=7), the group read and execute permissions (4+1=5), and others only read permission (4), you would use ```chmod 754 my_script.sh```.
+
+**Example**:
+
+```bash
+chmod 755 my_script.sh #Owner: rwx, Group: r-x, Others: r-x
+```
+
+This is equivalent to ```chmod +x my_script.sh``` if the file already had read permissions for everyone.
+
+**When to Use chmod +x**
+
+You should use ```chmod +x``` whenever you create a new shell script that you intend to execute. It's a necessary step to tell the system that the file is not just a text file, but a program that can be run.
 
 #### <a name="chapter6part5.2"></a>Chapter 6 - Part 5.2: Running a Shell Script: ./script.sh
 
+Once a script has execute permissions, you can run it from the command line. The typical way to execute a script in the current directory is by using ```./script.sh```.
+
+**Understanding ./**
+
+The ```./``` prefix tells the shell to look for the script in the current directory. Without it, the shell will search for the script in the directories listed in your ```PATH``` environment variable (which typically includes directories like ```/usr/bin```, ```/usr/local/bin```, etc.).
+
+**Executing the Script**
+
+**Example:**
+
+Assuming ```my_script.sh``` is in your current directory and has execute permissions, you can run it with:
+
+```bash
+./my_script.sh
+```
+
+The shell will then execute the commands contained within the script.
+
+**Shebang (#!) and Script Execution**
+
+It's best practice to include a "shebang" line at the beginning of your shell scripts. The shebang line tells the system which interpreter to use to execute the script. For bash scripts, the shebang line is usually ```#!/bin/bash```.
+
+**Example:**
+
+```bash
+#!/bin/bash
+echo "Hello, world!"
+```
+
+When you execute the script using ```./my_script.sh```, the system will use ```/bin/bash``` to interpret and run the commands in the script.
+
+**Running Scripts with bash script.sh**
+
+Another way to execute a shell script is to explicitly invoke the ```bash``` interpreter:
+
+```bash
+bash my_script.sh
+```
+
+In this case, the script doesn't need execute permissions because you're directly telling ```bash``` to interpret the file. However, using ```./script.sh``` after setting execute permissions is the more common and recommended practice.
+
+**Differences between ./script.sh and bash script.sh**
+
+
+|Feature|	```./script.sh```	|```bash script.sh```|
+| :--: | :--: | :--: |
+|Execute Permission Required	|Yes	|No|
+|Uses Shebang	|Yes	|No (unless the script calls other scripts)|
+|Execution Context	|Executes in a subshell (usually)	|Executes in the current shell|
+
+The execution context difference is important. When you run ```./script.sh```, the script typically runs in a subshell, which is a separate process. Changes made to the environment within the script (e.g., setting variables) will not affect the current shell. When you run ```bash script.sh```, the script runs in the current shell, so changes to the environment will persist after the script finishes.
+
 #### <a name="chapter6part5.3"></a>Chapter 6 - Part 5.3: Practical Examples and Demonstrations
+
+Let's create a simple script and run it:
+
+- **Create a script named greeting.sh**:
+
+```bash
+nano greeting.sh
+```
+
+Add the following content to the file:
+
+```bash
+#!/bin/bash
+echo "Hello, $USER!"
+echo "Today is $(date)"
+```
+
+- **Make the script executable**:
+
+```bash
+chmod +x greeting.sh
+```
+
+- **Run the script**:
+
+```bash
+./greeting.sh
+```
+
+The output will be similar to:
+
+```
+Hello, your_username!
+Today is Tue Oct 27 10:30:00 PDT 2023
+```
+
+Now, let's create a script that modifies the environment:
+
+- **Create a script named set_variable.sh**:
+
+```bash
+nano set_variable.sh
+```
+
+Add the following content:
+
+```bash
+#!/bin/bash
+export MY_VARIABLE="Hello from the script!"
+echo "Variable set in script."
+```
+
+- **Make the script executable**:
+
+```bash
+chmod +x set_variable.sh
+```
+
+- **Run the script using ./set_variable.sh**:
+
+```bash
+./set_variable.sh
+```
+
+- **Check if the variable is set in the current shell**:
+
+```bash
+echo $MY_VARIABLE
+```
+
+The output will be empty because the script ran in a subshell.
+
+- **Run the script using bash set_variable.sh**:
+
+```bash
+bash set_variable.sh
+```
+
+- **Check if the variable is set in the current shell**:
+
+```bash
+echo $MY_VARIABLE
+The output will be:
+```
+
+```
+Hello from the script!
+```
+
+This demonstrates that running the script with bash modifies the current shell's environment.
 
 #### <a name="chapter6part6"></a>Chapter 6 - Part 6: Variables and Basic Control Structures in Shell Scripts (if/else)
 
